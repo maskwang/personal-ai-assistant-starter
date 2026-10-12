@@ -1,0 +1,35 @@
+# MCP 接入示例（obsidian-mcp）
+#
+# 1) 通用形式（Claude Desktop / Cursor / 多数 MCP 客户端）——写进客户端的 mcpServers 配置：
+#
+# {
+#   "mcpServers": {
+#     "mcp-obsidian": {
+#       "command": "npx",
+#       "args": ["-y", "obsidian-mcp", "serve", "--vault", "myvault=/ABSOLUTE/PATH/TO/vault"]
+#     }
+#   }
+# }
+#
+# 2) DSH / cordis 形式（本机 patch 层，对所有 profile 生效）：
+- insert:
+    - id: mcp-obsidian
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: mcp-obsidian
+        transport: stdio
+        command: npx
+        args:
+          - "-y"
+          - "obsidian-mcp"
+          # v2 起用「serve --vault 名字=绝对路径」，旧的「位置参数」写法会告警并在未来版本失效
+          - "serve"
+          - "--vault"
+          - "myvault=/ABSOLUTE/PATH/TO/vault"
+        env: {}
+        cwd: !!js process.cwd()
+#
+# 说明：
+# - vault 名字（上面的 myvault）是 AI 调用工具时的 vault 参数值，随便取，但要和调用时一致；
+# - 路径必须是绝对路径；
+# - 首次运行 npx 需要联网下载 obsidian-mcp，请确保能访问 npm registry。

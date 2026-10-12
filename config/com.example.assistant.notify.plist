@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  备选方案：按固定时间点触发（不用 dispatch.sh 的每分钟轮询）。
+  把 /ABSOLUTE/PATH/TO/my-assistant 换成你的实际路径，然后：
+
+    cp config/com.example.assistant.notify.plist ~/Library/LaunchAgents/com.你的名字.assistant.notify.plist
+    launchctl load ~/Library/LaunchAgents/com.你的名字.assistant.notify.plist
+
+  两种方案的区别：
+  - 本文件（StartCalendarInterval）：时间点清晰，但 Mac 睡眠时那一刻会被跳过，不补跑；
+  - scripts/install-launchd.sh（StartInterval 60 + dispatch.sh 判断）：睡醒后一分钟内补上，更适合上班族笔记本。
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.assistant.notify</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/ABSOLUTE/PATH/TO/my-assistant/scripts/dispatch.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>19</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>21</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>21</integer>
+            <key>Minute</key><integer>45</integer>
+        </dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/ABSOLUTE/PATH/TO/my-assistant/scripts/launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/ABSOLUTE/PATH/TO/my-assistant/scripts/launchd.err</string>
+</dict>
+</plist>
