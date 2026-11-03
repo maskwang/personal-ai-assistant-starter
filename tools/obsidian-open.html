@@ -30,11 +30,17 @@
 </head>
 <body>
 <div class="card">
+  <div id="dingtalk-banner" style="display:none;background:#fef3c7;color:#92400e;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:14px;line-height:1.5;border:1px solid #fde68a;">
+    <strong>⚠️ 因钉钉安全限制：</strong><br>
+    请点击右上角 <strong>「…」</strong> 按钮，选择 <strong>「在默认浏览器中打开」</strong>，即可自动唤起 Obsidian 直达笔记！
+  </div>
+
   <h1 id="title">正在唤起 Obsidian…</h1>
   <p class="sub" id="sub"></p>
   <a class="btn" id="go" href="#">在 Obsidian 中打开</a>
-  <div class="fallback" id="fallback">没反应？再点一次上面的按钮。仍然无效时，长按下面的链接复制，粘贴到 Safari 地址栏回车。</div>
-  <p class="hint">备用：手动粘贴到浏览器地址栏</p>
+  <div class="fallback" id="fallback">在外部浏览器中点击上方按钮，或点击下方按钮复制链接。</div>
+  <p class="hint">备用方案：</p>
+  <button id="copy-btn" style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #ddd;background:#f9f9fa;font-size:14px;cursor:pointer;">📋 点击一键复制深链</button>
   <code id="raw"></code>
 </div>
 <script>
@@ -45,22 +51,43 @@
   var target = 'obsidian://open?vault=' + encodeURIComponent(vault) +
                '&file=' + encodeURIComponent(file).replace(/%2F/g, '/');
 
+  var isDingTalk = /DingTalk/i.test(navigator.userAgent);
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+
   document.getElementById('sub').textContent = file || '（未指定笔记）';
   document.getElementById('go').href = target;
   document.getElementById('raw').textContent = target;
 
-  var fired = false;
-  function jump() {
-    if (fired) return;
-    fired = true;
-    document.getElementById('title').textContent = '在 Obsidian 中打开';
-    location.href = target;
-    setTimeout(function () {
-      document.getElementById('fallback').style.display = 'block';
-    }, 1200);
+  // 复制按钮交互
+  var copyBtn = document.getElementById('copy-btn');
+  copyBtn.onclick = function() {
+    navigator.clipboard.writeText(target).then(function() {
+      copyBtn.textContent = '✅ 已成功复制！粘贴至 Safari 地址栏即可';
+      setTimeout(function() { copyBtn.textContent = '📋 点击一键复制深链'; }, 3000);
+    }).catch(function() {
+      alert('请长按下方代码框手动复制');
+    });
+  };
+
+  if (isDingTalk || isWeChat) {
+    // 钉钉/微信内置浏览器环境：拦截了自定义协议
+    document.getElementById('dingtalk-banner').style.display = 'block';
+    document.getElementById('title').textContent = '请在系统浏览器中打开';
+    document.getElementById('fallback').style.display = 'block';
+  } else {
+    // Safari / Chrome 等原生系统浏览器环境：自动无缝唤起
+    var fired = false;
+    function jump() {
+      if (fired) return;
+      fired = true;
+      document.getElementById('title').textContent = '在 Obsidian 中打开';
+      location.href = target;
+      setTimeout(function () {
+        document.getElementById('fallback').style.display = 'block';
+      }, 1200);
+    }
+    if (file) setTimeout(jump, 250);
   }
-  // 安卓 webview 多数允许直接跳转；iOS 若拦截，用户点按钮（用户手势）即可
-  if (file) setTimeout(jump, 250);
 })();
 </script>
 </body>
