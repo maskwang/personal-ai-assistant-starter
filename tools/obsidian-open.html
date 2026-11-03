@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>在 Obsidian 中打开</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 20px 40px;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #f7f7f8; color: #1c1c1e;
+  }
+  @media (prefers-color-scheme: dark) { body { background:#111; color:#eee; } .card{background:#1c1c1e!important} code{background:#2c2c2e!important;color:#8ee!important} }
+  .card { max-width: 520px; margin: 0 auto; background:#fff; border-radius:16px; padding:24px 20px; box-shadow:0 2px 16px rgba(0,0,0,.08); }
+  h1 { font-size: 19px; margin: 0 0 6px; }
+  .sub { margin: 0 0 22px; font-size: 13px; opacity: .65; word-break: break-all; }
+  a.btn {
+    display: block; text-align: center; text-decoration: none;
+    padding: 15px 16px; border-radius: 12px; font-size: 17px; font-weight: 600;
+    background: #7c3aed; color: #fff;
+  }
+  a.btn:active { transform: scale(.985); }
+  .hint { margin: 22px 0 8px; font-size: 13px; opacity: .7; }
+  code { display:block; padding: 10px 12px; border-radius: 10px; background:#f0f0f2; color:#333;
+         font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; user-select: all; }
+  .fallback { display:none; margin-top:16px; padding:12px 14px; border-radius:10px; background:#fff3cd; color:#664d03; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 id="title">正在唤起 Obsidian…</h1>
+  <p class="sub" id="sub"></p>
+  <a class="btn" id="go" href="#">在 Obsidian 中打开</a>
+  <div class="fallback" id="fallback">没反应？再点一次上面的按钮。仍然无效时，长按下面的链接复制，粘贴到 Safari 地址栏回车。</div>
+  <p class="hint">备用：手动粘贴到浏览器地址栏</p>
+  <code id="raw"></code>
+</div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var file = (q.get('file') || '').replace(/^\/+/, '');
+  var vault = q.get('vault') || 'Vaults';
+  var target = 'obsidian://open?vault=' + encodeURIComponent(vault) +
+               '&file=' + encodeURIComponent(file).replace(/%2F/g, '/');
+
+  document.getElementById('sub').textContent = file || '（未指定笔记）';
+  document.getElementById('go').href = target;
+  document.getElementById('raw').textContent = target;
+
+  var fired = false;
+  function jump() {
+    if (fired) return;
+    fired = true;
+    document.getElementById('title').textContent = '在 Obsidian 中打开';
+    location.href = target;
+    setTimeout(function () {
+      document.getElementById('fallback').style.display = 'block';
+    }, 1200);
+  }
+  // 安卓 webview 多数允许直接跳转；iOS 若拦截，用户点按钮（用户手势）即可
+  if (file) setTimeout(jump, 250);
+})();
+</script>
+</body>
+</html>
